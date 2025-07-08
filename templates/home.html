@@ -1,198 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Algerian Forest Fire Prediction</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    html, body {
-      height: 100%;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #121212;
-      color: #fff;
-    }
-
-    body::before {
-      content: "";
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 100%;
-      width: 100%;
-      background: rgba(0,0,0,0.6);
-      z-index: 0;
-      pointer-events: none;
-    }
-
-    video.bg-video {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      z-index: -2;
-      opacity: {% if prediction == 'Fire' %}0.5{% else %}0{% endif %};
-      transition: opacity 0.5s ease-in-out;
-    }
-
-    .container {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      padding: 30px 5%;
-      max-width: 1400px;
-      margin: 0 auto;
-      z-index: 2;
-      position: relative;
-    }
-
-    .form-box, .result-box {
-      flex: 1 1 48%;
-      background-color: rgba(255, 255, 255, 0.06);
-      backdrop-filter: blur(10px);
-      padding: 30px;
-      border-radius: 12px;
-      margin: 10px 0;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-    }
-
-    h2 {
-      text-align: center;
-      margin-bottom: 25px;
-      color: #f4f4f4;
-    }
-
-    label {
-      font-weight: 600;
-      display: block;
-      margin-bottom: 6px;
-      margin-top: 18px;
-    }
-
-    input[type="number"], select {
-      width: 100%;
-      padding: 12px;
-      border-radius: 6px;
-      border: none;
-      margin-top: 5px;
-      font-size: 14px;
-    }
-
-    input[type="submit"] {
-      width: 100%;
-      padding: 12px;
-      background-color: #ff6b00;
-      border: none;
-      color: white;
-      font-size: 16px;
-      font-weight: bold;
-      border-radius: 6px;
-      margin-top: 30px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-
-    input[type="submit"]:hover {
-      background-color: #e65c00;
-    }
-
-    .result-text {
-      text-align: center;
-      margin-top: 40px;
-      font-size: 24px;
-      font-weight: bold;
-      padding: 20px;
-      border-radius: 8px;
-      background-color: {% if prediction == 'Fire' %}#ff1e1e{% else %}#28a745{% endif %};
-      box-shadow: 0 0 15px {% if prediction == 'Fire' %}#ff4d4d{% else %}#28a745{% endif %};
-      color: #fff;
-    }
-
-    @media (max-width: 768px) {
-      .form-box, .result-box {
-        flex: 1 1 100%;
-      }
-
-      .container {
-        padding: 20px 3%;
-      }
-
-      .result-text {
-        font-size: 20px;
-        margin-top: 20px;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algerian Forest Fire Prediction</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
+    <!-- Navbar -->
+    <header class="header">
+        <nav class="navbar">
+            <div class="logo">🔥 Algerian Forest Fire</div>
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="/predict">Predict</a></li>
+            </ul>
+        </nav>
+    </header>
 
-  <!-- 🔥 Background Fire Video -->
-  <video autoplay muted loop class="bg-video">
-    <source src="{{ url_for('static', filename='fire.mp4') }}" type="video/mp4" />
-  </video>
 
-  <div class="container">
-    <!-- 📝 Form Section -->
-    <div class="form-box">
-      <h2>🔥 Forest Fire Predictor</h2>
-      <form action="{{ url_for('predict_datapoint') }}" method="POST">
-        <label for="Temperature">Temperature (°C):</label>
-        <input type="number" name="Temperature" step="0.1" required />
-
-        <label for="RH">Relative Humidity (%):</label>
-        <input type="number" name="RH" step="0.1" required />
-
-        <label for="Ws">Wind Speed (km/h):</label>
-        <input type="number" name="Ws" step="0.1" required />
-
-        <label for="Rain">Rainfall (mm):</label>
-        <input type="number" name="Rain" step="0.1" required />
-
-        <label for="FFMC">FFMC:</label>
-        <input type="number" name="FFMC" step="0.1" required />
-
-        <label for="DMC">DMC:</label>
-        <input type="number" name="DMC" step="0.1" required />
-
-        <label for="ISI">ISI:</label>
-        <input type="number" name="ISI" step="0.1" required />
-
-        <label for="Classes">Classes:</label>
-        <select name="Classes" required>
-          <option value="0">No Fire</option>
-          <option value="1">Fire</option>
-        </select>
-
-        <label for="Region">Region:</label>
-        <select name="Region" required>
-          <option value="0">Bejaia</option>
-          <option value="1">Sidi-Bel Abbes</option>
-        </select>
-
-        <input type="submit" value="Predict Fire Risk" />
-      </form>
-    </div>
-
-    <!-- ✅ Prediction Result -->
-    <div class="result-box">
-      <h2>Prediction Result</h2>
-      {% if prediction %}
-        <div class="result-text">
-          {{ prediction }}
+    <!-- Hero Section -->
+    <section class="hero premium-hero" style="background-image: linear-gradient(rgba(24,49,83,0.7),rgba(24,49,83,0.7)), url('{{ url_for('static', filename='images/hero-bg.jpg') }}');">
+        <div class="hero-content premium-hero-content">
+            <h1 class="premium-title">Algerian Forest Fire Prediction</h1>
+            <p class="premium-subtitle">Safeguarding Algeria's forests with AI-powered early warning.<br>Fast. Accurate. For a greener tomorrow.</p>
+            <a href="/predict" class="hero-btn premium-btn">Try Prediction</a>
         </div>
-      {% else %}
-        <div class="result-text" style="background: #777; box-shadow: none;">
-          Submit the form to see prediction
+        <div class="hero-overlay-shape"></div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about premium-about" id="about">
+        <h2>About This App</h2>
+        <div class="about-flex">
+            <div class="about-text">
+                <p>
+                    <strong>Algerian Forest Fire Prediction</strong> is a modern web application that leverages machine learning to predict the Fire Weather Index (FWI) for Algerian forests. By analyzing real meteorological data, it empowers authorities and citizens to take timely action against wildfires.<br><br>
+                    <ul>
+                        <li>🌲 <b>Protects biodiversity</b> and natural resources</li>
+                        <li>⚡ <b>Instant, AI-driven predictions</b> for fire risk</li>
+                        <li>📊 <b>Easy-to-use</b> and accessible for everyone</li>
+                    </ul>
+                </p>
+            </div>
+            <div class="about-img" style="max-width:420px;min-width:220px;">
+                <img src="{{ url_for('static', filename='images/images.jpg') }}" alt="Algerian Forest" style="width:100%;max-width:420px;min-width:220px;box-shadow:0 4px 24px rgba(24,49,83,0.18);border-radius:18px;border:3px solid #ff9800;" />
+            </div>
         </div>
-      {% endif %}
-    </div>
-  </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <p>Contact: info@algerianfireai.com | &copy; 2025 Algerian Forest Fire Prediction</p>
+        </div>
+    </footer>
 </body>
 </html>
