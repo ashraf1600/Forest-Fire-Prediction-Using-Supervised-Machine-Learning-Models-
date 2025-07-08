@@ -3,8 +3,7 @@ from flask import Flask, render_template, request
 import numpy as np
 import os
 
-application = Flask(__name__)
-app = application
+app= Flask(__name__)
 
 # Load trained ElasticNet model and Scaler
 MODEL_PATH = os.path.join('models', 'elasticcv.pkl')
